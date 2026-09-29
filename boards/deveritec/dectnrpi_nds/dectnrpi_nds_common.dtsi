@@ -1,0 +1,252 @@
+/*
+ * Copyright (c) 2026 Deveritec GmbH
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Common board description for dectnrpi_nds. Included by the secure and the
+ * non-secure board DTS after the SoC base DTSI (nrf9151_laca / nrf91_ns).
+ */
+
+#include <zephyr/dt-bindings/input/input-event-codes.h>
+#include "dectnrpi_nds_pinctrl.dtsi"
+#include "dectnrpi_nds_partitioning.dtsi"
+
+/ {
+	model = "deveritec - nrf91 rPi_Nr+Shield";
+	compatible = "deveritec,deveritec-rpishield";
+
+	chosen {
+		zephyr,console = &uart0;
+		zephyr,shell-uart = &uart0;
+		zephyr,cdc-acm-uart = &uart0;
+		nordic,pm-ext-flash = &w25q32;
+	};
+
+	leds {
+		compatible = "gpio-leds";
+		led0: led0 {
+			gpios = <&gpio0 19 GPIO_ACTIVE_HIGH>;
+			label = "Blue LED";
+		};
+		led1: led1 {
+			gpios = <&gpio0 18 GPIO_ACTIVE_HIGH>;
+			label = "Green LED";
+		};
+		led2: led2 {
+			gpios = <&gpio0 20 GPIO_ACTIVE_HIGH>;
+			label = "Red LED";
+		};
+	};
+
+	buttons {
+		compatible = "gpio-keys";
+		button1: button1 {
+			gpios = <&gpio0 17 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
+			label = "Push button 1";
+			zephyr,code = <INPUT_KEY_0>;
+		};
+		button2: button2 {
+			gpios = <&gpio0 14 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
+			label = "Push button 2";
+			zephyr,code = <INPUT_KEY_1>;
+		};
+		button3: button3 {
+			gpios = <&gpio0 28 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
+			label = "Push button 3";
+			zephyr,code = <INPUT_KEY_2>;
+		};
+	};
+
+	longpress {
+		compatible = "zephyr,input-longpress";
+		input-codes = <INPUT_KEY_0>, <INPUT_KEY_1>, <INPUT_KEY_2>;
+		short-codes = <INPUT_KEY_A>, <INPUT_KEY_B>, <INPUT_KEY_C>;
+		long-codes = <INPUT_KEY_X>, <INPUT_KEY_Y>, <INPUT_KEY_Z>;
+		long-delay-ms = <1000>;
+	};
+
+	control_gpios {
+		compatible = "gpio-leds";
+
+		/* FTDI is replaced with Infineon (Cypress) USB2SERIAL */
+		usb_reset: usb_reset {
+			gpios = <&gpio0 31 GPIO_ACTIVE_LOW>;
+			label = "reset line to USB2Serial Chip";
+		};
+
+	};
+
+	zephyr,user {
+		/* Used in hardware-test to iterate over all gpio pins. */
+		rpi_header_gpios = <
+			&gpio0 12 GPIO_ACTIVE_HIGH /* PI_UART_RX  */
+			&gpio0 13 GPIO_ACTIVE_HIGH /* PI_UART_TX  */
+			&gpio0 14 GPIO_ACTIVE_LOW  /* Button 2    */
+			&gpio0 15 GPIO_ACTIVE_HIGH /* PI_UART_RTS */
+			&gpio0 16 GPIO_ACTIVE_HIGH /* PI_UART_CTS */
+			&gpio0 17 GPIO_ACTIVE_LOW  /* Button 1    */
+			&gpio0 21 GPIO_ACTIVE_HIGH /* PI_SPI_MOSI */
+			&gpio0 22 GPIO_ACTIVE_HIGH /* PI_SPI_MISO */
+			&gpio0 23 GPIO_ACTIVE_HIGH /* PI_SPI_CLK  */
+			&gpio0 24 GPIO_ACTIVE_HIGH /* PI_SPI_CS   */
+			&gpio0 26 GPIO_ACTIVE_HIGH /* PI_GPIO22   */
+			&gpio0 27 GPIO_ACTIVE_HIGH /* PI_GPIO27   */
+			&gpio0 28 GPIO_ACTIVE_LOW  /* Button 3    */
+			&gpio0 29 GPIO_ACTIVE_HIGH /* PI_I2C_SDA  */
+			&gpio0 30 GPIO_ACTIVE_HIGH /* PI_I2C_SCL  */
+		>;
+	};
+
+	/*
+	 * Map Raspberry Pi header pin numbers to nRF GPIOs. Zephyr resolves
+	 * '<&raspberrypi_header pin flags>' to '<&gpio0 actual_pin flags>'.
+	 * raspberrypi_header.gpio-map cannot be used directly for this (nexus map
+	 * with different lengths is not supported yet).
+	 */
+	raspberrypi_header: raspberrypi_header {
+		compatible = "raspberrypi-40pins-header";
+		#gpio-cells = <2>;
+		gpio-map-mask = <0xffffffff 0xffffffc0>;
+		gpio-map-pass-thru = <0 0x3f>;
+		gpio-map =
+			< 10 0 &gpio0 12 0 >, /* PI_UART_RX  PIN 10 */
+			< 8  0 &gpio0 13 0 >, /* PI_UART_TX  PIN 8  */
+			< 29 0 &gpio0 14 0 >, /* Button 2    PIN 29 */
+			< 11 0 &gpio0 15 0 >, /* PI_UART_RTS PIN 11 */
+			< 36 0 &gpio0 16 0 >, /* PI_UART_CTS PIN 36 */
+			< 27 0 &gpio0 17 0 >, /* Button 1    PIN 27 */
+			< 19 0 &gpio0 21 0 >, /* PI_SPI_MOSI PIN 19 */
+			< 21 0 &gpio0 22 0 >, /* PI_SPI_MISO PIN 21 */
+			< 23 0 &gpio0 23 0 >, /* PI_SPI_CLK  PIN 23 */
+			< 24 0 &gpio0 24 0 >, /* PI_SPI_CS   PIN 24 */
+			< 15 0 &gpio0 26 0 >, /* PI_GPIO22   PIN 15 */
+			< 13 0 &gpio0 27 0 >, /* PI_GPIO27   PIN 13 */
+			< 31 0 &gpio0 28 0 >, /* Button 3    PIN 31 */
+			< 3  0 &gpio0 29 0 >, /* PI_I2C_SDA  PIN 3  */
+			< 5  0 &gpio0 30 0 >; /* PI_I2C_SCL  PIN 5  */
+	};
+
+	aliases {
+		led0 = &led0;
+		led1 = &led1;
+		led2 = &led2;
+		sw0 = &button1;
+		sw1 = &button2;
+		sw2 = &button3;
+		mcuboot-button0 = &button1;
+		mcuboot-led0 = &led0;
+		watchdog0 = &wdt0;
+	};
+};
+
+&gpio0 {
+	status = "okay";
+};
+
+&gpiote {
+	status = "okay";
+};
+
+/* USB-to-serial bridge, channel A: console / shell */
+&uart0 {
+	status = "okay";
+	current-speed = <115200>;
+	pinctrl-0 = <&uart0_channel_a_default>;
+	pinctrl-1 = <&uart0_channel_a_sleep>;
+	pinctrl-names = "default", "sleep";
+};
+
+/* USB-to-serial bridge, channel B (disabled in the non-secure build, see _ns.dts) */
+&uart1 {
+	status = "okay";
+	current-speed = <115200>;
+	pinctrl-0 = <&uart1_channel_b_default>;
+	pinctrl-1 = <&uart1_channel_b_sleep>;
+	pinctrl-names = "default", "sleep";
+};
+
+/* External SPI NOR flash W25Q32 (32 MiB) */
+&spi3 {
+	status = "okay";
+	pinctrl-0 = <&spi3_default>;
+	pinctrl-1 = <&spi3_sleep>;
+	pinctrl-names = "default", "sleep";
+	cs-gpios = <&gpio0 8 GPIO_ACTIVE_LOW>;
+
+	w25q32: w25q32@0 {
+		compatible = "jedec,spi-nor";
+		reg = <0>;
+		spi-max-frequency = <DT_FREQ_M(8)>;
+		jedec-id = [ef 40 16];
+		size = <33554432>;
+		has-dpd;
+		t-enter-dpd = <3000>;
+		t-exit-dpd = <40000>;
+		status = "okay";
+
+		partitions {
+			compatible = "fixed-partitions";
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			/* Must match the internal slot sizes (0xe8000 each) */
+			slot1_partition: partition@8c000 {
+				compatible = "fixed-subpartitions";
+				label = "image-1";
+				reg = <0x0008c000 0x000e8000>;
+				ranges = <0x0 0x0008c000 0x000e8000>;
+				#address-cells = <1>;
+				#size-cells = <1>;
+
+				slot1_s_partition: partition@0 {
+					label = "image-1-secure";
+					reg = <0x00000000 0x00028000>;
+				};
+
+				slot1_ns_partition: partition@28000 {
+					label = "image-1-nonsecure";
+					reg = <0x00028000 0x000c0000>;
+				};
+			};
+
+			external_flash_partition: partition@174000 {
+				label = "external_flash";
+				reg = <0x00174000 0x00400000>;
+			};
+		};
+	};
+};
+
+/*
+ * Raspberry Pi header SPI. The nRF acts as SPI slave (SPIS). Mutually
+ * exclusive with uart1_pi and spi0 on the Pi header (shared pins P0.21-P0.24).
+ */
+&spi1 {
+	status = "disabled";
+	compatible = "nordic,nrf-spis";
+	pinctrl-0 = <&spis_pi_default>;
+	pinctrl-1 = <&spis_pi_sleep>;
+	pinctrl-names = "default", "sleep";
+	def-char = <0x00>;
+
+	gendev: gendev@0 {
+		compatible = "vnd,spi-device";
+		reg = <0>;
+		spi-max-frequency = <DT_FREQ_M(8)>;
+	};
+};
+
+&spi0 {
+	status = "disabled";
+};
+
+&spi2 {
+	status = "disabled";
+};
+
+&uart3 {
+	status = "disabled";
+};
+
+&i2c3 {
+	status = "disabled";
+};

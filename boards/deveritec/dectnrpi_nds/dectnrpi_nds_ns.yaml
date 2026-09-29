@@ -1,0 +1,20 @@
+# Copyright (c) 2026 Deveritec GmbH
+# SPDX-License-Identifier: Apache-2.0
+#
+identifier: dectnrpi_nds/nrf9151/ns
+name: dectnrpi_nds
+vendor: deveritec
+type: mcu
+arch: arm
+ram: 256
+flash: 1024
+toolchain:
+  - zephyr
+  - gnuarmemb
+  - xtools
+supported:
+  - gpio
+  - i2c
+  - pwm
+  - spi
+  - netif:modem

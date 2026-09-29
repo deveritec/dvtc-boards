@@ -1,0 +1,19 @@
+# Copyright (c) 2026 Deveritec GmbH
+# SPDX-License-Identifier: Apache-2.0
+
+common:
+  tags:
+    - hardware
+    - gpio
+    - led
+    - button
+  platform_allow:
+    - dectnrpi_nds/nrf9151/ns
+  integration_platforms:
+    - dectnrpi_nds/nrf9151/ns
+  harness: ztest
+
+tests:
+  deveritec.dectnrpi_nds.hw.selftest:
+    # Runs all suites: gpio_loopback (automatic), led_button_tests (operator), ext_flash (automatic)
+    timeout: 400

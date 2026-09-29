@@ -1,0 +1,23 @@
+/*
+ * Copyright (c) 2026 Deveritec GmbH
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/dts-v1/;
+
+#include <nordic/nrf9151_ns_laca.dtsi>
+#include "dectnrpi_nds_common.dtsi"
+
+/ {
+	chosen {
+		zephyr,flash = &flash0;
+		zephyr,sram = &sram0_ns_app;
+		zephyr,code-partition = &slot0_ns_partition;
+		zephyr,flash-res-partition = &slot1_ns_partition;
+	};
+};
+
+/* UART1 is used by TF-M, keep it disabled for the non-secure application. */
+&uart1 {
+	status = "disabled";
+};

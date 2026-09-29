@@ -1,0 +1,34 @@
+/*
+ * Copyright (c) 2026 Deveritec GmbH
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * GPIO loopback pairs on the Raspberry Pi header (dectnrpi_nds).
+ * Each pair must be connected with a jumper wire. Index i of the out list
+ * is connected to index i of the in list.
+ *
+ *  #  out pin (header / nRF)   in pin (header / nRF)   function
+ *  1   8 / P0.13 (UART TX)     10 / P0.12 (UART RX)    GPIO
+ *  2  11 / P0.15 (UART RTS)    13 / P0.27 (GPIO27)     GPIO
+ *  3  15 / P0.26 (GPIO22)      19 / P0.21 (SPI MOSI)   GPIO
+ *  4  21 / P0.22 (SPI MISO)    23 / P0.23 (SPI CLK)    GPIO
+ *  5  24 / P0.24 (SPI CS)      36 / P0.16 (UART CTS)   GPIO
+ 
+ * Not used: header pins 27, 29, 31 (buttons, tested separately).
+ */
+
+#include "nrf91x1_partition_without_bootloader.dtsi"
+
+/ {
+	zephyr,user {
+		loopback-out-gpios = <&raspberrypi_header 8 0>,
+							<&raspberrypi_header 11 0>,
+							<&raspberrypi_header 15 0>,
+							<&raspberrypi_header 21 0>,
+							<&raspberrypi_header 24 0>;
+		loopback-in-gpios = <&raspberrypi_header 10 0>,
+							<&raspberrypi_header 13 0>,
+							<&raspberrypi_header 19 0>,
+							<&raspberrypi_header 23 0>,
+							<&raspberrypi_header 36 0>;
+	};
+};

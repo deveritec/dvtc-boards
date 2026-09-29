@@ -1,0 +1,144 @@
+/*
+ * Copyright (c) 2026 Deveritec GmbH
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+&pinctrl {
+	/* UART0 -> USB2Serial channel A (P0.04 TX, P0.25 RX) */
+	uart0_channel_a_default: uart0_channel_a_default {
+		group1 {
+			psels = <NRF_PSEL(UART_TX, 0, 4)>;
+		};
+		group2 {
+			psels = <NRF_PSEL(UART_RX, 0, 25)>;
+			bias-pull-up;
+		};
+	};
+
+	uart0_channel_a_sleep: uart0_channel_a_sleep {
+		group1 {
+			psels = <NRF_PSEL(UART_TX, 0, 4)>,
+				<NRF_PSEL(UART_RX, 0, 25)>;
+			low-power-enable;
+		};
+	};
+
+	/* UART1 -> USB2Serial channel B (P0.03 TX, P0.02 RX) */
+	uart1_channel_b_default: uart1_channel_b_default {
+		group1 {
+			psels = <NRF_PSEL(UART_TX, 0, 3)>;
+		};
+		group2 {
+			psels = <NRF_PSEL(UART_RX, 0, 2)>;
+			bias-pull-up;
+		};
+	};
+
+	uart1_channel_b_sleep: uart1_channel_b_sleep {
+		group1 {
+			psels = <NRF_PSEL(UART_TX, 0, 3)>,
+				<NRF_PSEL(UART_RX, 0, 2)>;
+			low-power-enable;
+		};
+	};
+
+	/* Raspberry Pi header UART0 (nRF TX = P0.12 -> Pi RX, nRF RX = P0.13 <- Pi TX) */
+	uart0_pi_default: uart0_pi_default {
+		group1 {
+			psels = <NRF_PSEL(UART_TX, 0, 12)>,
+				<NRF_PSEL(UART_RTS, 0, 15)>;
+		};
+		group2 {
+			psels = <NRF_PSEL(UART_RX, 0, 13)>,
+				<NRF_PSEL(UART_CTS, 0, 16)>;
+			bias-pull-up;
+		};
+	};
+
+	uart0_pi_sleep: uart0_pi_sleep {
+		group1 {
+			psels = <NRF_PSEL(UART_TX, 0, 12)>,
+				<NRF_PSEL(UART_RX, 0, 13)>;
+			low-power-enable;
+		};
+	};
+
+	/*
+	 * Raspberry Pi header UART1 (overrides SPI1 on the header, see spis_pi_*):
+	 * nRF TX P0.22 -> Pi pin 21 (RXD), nRF RX P0.24 <- Pi pin 24 (TXD)
+	 */
+	uart1_pi_default: uart1_pi_default {
+		group1 {
+			psels = <NRF_PSEL(UART_TX, 0, 22)>;
+		};
+		group2 {
+			psels = <NRF_PSEL(UART_RX, 0, 24)>;
+			bias-pull-up;
+		};
+	};
+
+	uart1_pi_sleep: uart1_pi_sleep {
+		group1 {
+			psels = <NRF_PSEL(UART_TX, 0, 22)>,
+				<NRF_PSEL(UART_RX, 0, 24)>;
+			low-power-enable;
+		};
+	};
+
+	/* External SPI NOR flash (W25Q32) */
+	spi3_default: spi3_default {
+		group1 {
+			psels = <NRF_PSEL(SPIM_SCK, 0, 10)>,
+				<NRF_PSEL(SPIM_MOSI, 0, 11)>,
+				<NRF_PSEL(SPIM_MISO, 0, 9)>;
+		};
+	};
+
+	spi3_sleep: spi3_sleep {
+		group1 {
+			psels = <NRF_PSEL(SPIM_SCK, 0, 10)>,
+				<NRF_PSEL(SPIM_MOSI, 0, 11)>,
+				<NRF_PSEL(SPIM_MISO, 0, 9)>;
+			low-power-enable;
+		};
+	};
+
+	/* I2C2 on the Pi header (P0.29 SDA, P0.30 SCL) */
+	i2c2_default: i2c2_default {
+		group1 {
+			psels = <NRF_PSEL(TWIM_SDA, 0, 29)>,
+				<NRF_PSEL(TWIM_SCL, 0, 30)>;
+		};
+	};
+
+	i2c2_sleep: i2c2_sleep {
+		group1 {
+			psels = <NRF_PSEL(TWIM_SDA, 0, 29)>,
+				<NRF_PSEL(TWIM_SCL, 0, 30)>;
+			low-power-enable;
+		};
+	};
+
+	/*
+	 * Raspberry Pi is SPI master, nRF is SPI slave (SPIS).
+	 * Cannot be active together with uart1_pi (shares P0.22 and P0.24).
+	 */
+	spis_pi_default: spis_pi_default {
+		group1 {
+			psels = <NRF_PSEL(SPIS_SCK, 0, 23)>,
+				<NRF_PSEL(SPIS_MISO, 0, 22)>,
+				<NRF_PSEL(SPIS_MOSI, 0, 21)>,
+				<NRF_PSEL(SPIS_CSN, 0, 24)>;
+		};
+	};
+
+	spis_pi_sleep: spis_pi_sleep {
+		group1 {
+			psels = <NRF_PSEL(SPIS_SCK, 0, 23)>,
+				<NRF_PSEL(SPIS_MISO, 0, 22)>,
+				<NRF_PSEL(SPIS_MOSI, 0, 21)>,
+				<NRF_PSEL(SPIS_CSN, 0, 24)>;
+			low-power-enable;
+		};
+	};
+};

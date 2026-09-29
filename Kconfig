@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: Apache-2.0
+
+menu "Deveritec Boards"
+
+config DEVERITEC_BOARDS
+    bool "Deveritec Boards"
+    default y
+    help
+      Enable the Deveritec Boards.
+
+endmenu

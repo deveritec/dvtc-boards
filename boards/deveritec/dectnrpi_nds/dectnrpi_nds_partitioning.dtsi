@@ -1,0 +1,98 @@
+/*
+ * Copyright (c) 2026 Deveritec GmbH
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Internal flash and SRAM partitioning for dectnrpi_nds.
+ * Included by dectnrpi_nds_common.dtsi, used by secure and non-secure builds.
+ *
+ * Flash (1 MiB, internal):
+ *   0x00000 mcuboot          64 KiB
+ *   0x10000 image-0 (slot0)  928 KiB  (secure 160 KiB + non-secure 768 KiB)
+ *   0xf8000 tfm-its          32 KiB
+ *
+ * The slot0 size must match slot1 (external flash, see dectnrpi_nds_common.dtsi).
+ *
+ * SRAM (256 KiB, internal):
+ *   0x00000 sram0_s          48 KiB  (secure, TF-M)
+ *   0x0c000 sram0_ns         208 KiB (non-secure)
+ *     0x0c000 + 0x00000  modem IPC (NCS 3.4 DECT modem, 0x5b28 bytes)
+ *     0x0c000 + 0x05b28  sram0_ns_app
+ */
+
+&flash0 {
+	partitions {
+		ranges;
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		boot_partition: partition@0 {
+			compatible = "zephyr,mapped-partition";
+			label = "mcuboot";
+			reg = <0x00000000 0x00010000>;
+		};
+
+		slot0_partition: partition@10000 {
+			compatible = "zephyr,mapped-partition";
+			label = "image-0";
+			reg = <0x00010000 0x000e8000>;
+			ranges = <0x0 0x00010000 0x000e8000>;
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			slot0_s_partition: partition@0 {
+				compatible = "zephyr,mapped-partition";
+				label = "image-0-secure";
+				reg = <0x00000000 0x00028000>;
+			};
+
+			slot0_ns_partition: partition@28000 {
+				compatible = "zephyr,mapped-partition";
+				label = "image-0-nonsecure";
+				reg = <0x00028000 0x000c0000>;
+			};
+		};
+
+		tfm_its_partition: partition@f8000 {
+			compatible = "zephyr,mapped-partition";
+			label = "tfm-its";
+			reg = <0x000f8000 0x00008000>;
+		};
+	};
+};
+
+&sram0 {
+	sram0_s: sram@0 {
+		reg = <0x0 DT_SIZE_K(48)>;
+	};
+
+	sram0_ns: sram@c000 {
+		reg = <0xc000 DT_SIZE_K(208)>;
+		#address-cells = <1>;
+		#size-cells = <1>;
+		ranges = <0x0 0xc000 DT_SIZE_K(208)>;
+
+		/* Modem (shared) memory: NCS 3.4 DECT modem IPC requirements */
+		sram0_ns_modem: sram0_ns@0 {
+			reg = <0x0 0x5b28>;
+			#address-cells = <1>;
+			#size-cells = <1>;
+			ranges = <0x0 0x0 0x5b28>;
+
+			cpuapp_cpucell_ipc_shm_ctrl: shm-ctrl@0 {
+				reg = <0x0 0x728>;
+			};
+
+			cpuapp_cpucell_ipc_shm_heap: shm-heap-tx@728 {
+				reg = <0x728 0x3c00>;
+			};
+
+			cpucell_cpuapp_ipc_shm_heap: shm-heap-rx@4328 {
+				reg = <0x4328 0x1800>;
+			};
+		};
+
+		sram0_ns_app: sram0_ns@5b28 {
+			reg = <0x5b28 0x2e4d8>;
+		};
+	};
+};
